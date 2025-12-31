@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Surprise</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Fireworks Effect */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Container for everything */
+        #main-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The Envelope */
+        .envelope {
+            width: 200px;
+            height: 140px;
+            background-color: #ff69b4; /* Pink */
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+            margin-bottom: 20px;
+        }
+
+        /* Pixel Lights on Envelope */
+        .light {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: white;
+            border-radius: 50%;
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 2px #fff; opacity: 0.5; }
+            to { box-shadow: 0 0 10px #fff, 0 0 15px #ff69b4; opacity: 1; }
+        }
+
+        /* Glowing Button */
+        .glow-btn {
+            background: none;
+            border: 2px solid #ff69b4;
+            color: #ff69b4;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            text-shadow: 0 0 10px #ff69b4;
+            box-shadow: 0 0 15px #ff69b4;
+            transition: 0.3s;
+        }
+
+        .glow-btn:hover {
+            background: #ff69b4;
+            color: white;
+        }
+
+        /* Video Styling */
+        #video-container, #no-screen {
+            display: none;
+        }
+
+        video {
+            width: 320px;
+            border: 5px solid #ff69b4;
+            border-radius: 10px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: none; /* Shown after video ends */
+        }
+
+        .yes-btn { background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;}
+        .no-btn { background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+    <canvas id="fireworks"></canvas>
+
+    <div id="main-container">
+        <div id="envelope-screen">
+            <div class="envelope" id="env">
+                <div class="light" style="top:5px; left:5px;"></div>
+                <div class="light" style="top:5px; right:5px;"></div>
+                <div class="light" style="bottom:5px; left:5px;"></div>
+                <div class="light" style="bottom:5px; right:5px;"></div>
+                <div class="light" style="top:50%; left:50%;"></div>
+            </div>
+            <button class="glow-btn" onclick="openEnvelope()">OPEN</button>
+        </div>
+
+        <div id="video-container">
+            <video id="myVideo">
+                <source src="video1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div id="choice-buttons" class="btn-group">
+                <button class="yes-btn" onclick="goToWA()">YES</button>
+                <button class="no-btn" onclick="showNoScreen()">NO</button>
+            </div>
+        </div>
+
+        <div id="no-screen">
+            <video id="noVideo" autoplay loop>
+                <source src="video2.mp4" type="video/mp4">
+            </video>
+            <div class="btn-group" style="display: block;">
+                <button class="yes-btn" onclick="goToWA()">YES</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const waLink = "https://wa.me/qr/KXEVAJ5SLYVNJ1";
+
+        function openEnvelope() {
+            document.getElementById('envelope-screen').style.display = 'none';
+            const vidContainer = document.getElementById('video-container');
+            vidContainer.style.display = 'block';
+            const vid = document.getElementById('myVideo');
+            vid.play();
+
+            // When video 1 ends, show buttons
+            vid.onended = function() {
+                document.getElementById('choice-buttons').style.display = 'block';
+            };
+        }
+
+        function showNoScreen() {
+            document.getElementById('video-container').style.display = 'none';
+            document.getElementById('no-screen').style.display = 'block';
+        }
+
+        function goToWA() {
+            window.location.href = waLink;
+        }
+
+        // --- Basic Fireworks Logic ---
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function Firework() {
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height;
+            this.targetY = Math.random() * (canvas.height / 2);
+            this.speed = 3;
+            this.update = function() {
+                this.y -= this.speed;
+                if(this.y <= this.targetY) {
+                    this.y = canvas.height; 
+                    this.x = Math.random() * canvas.width;
+                }
+            };
+            this.draw = function() {
+                ctx.fillStyle = "white";
+                ctx.fillRect(this.x, this.y, 2, 10);
+            };
+        }
+
+        const fireworks = Array.from({length: 5}, () => new Firework());
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            fireworks.forEach(f => { f.update(); f.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
